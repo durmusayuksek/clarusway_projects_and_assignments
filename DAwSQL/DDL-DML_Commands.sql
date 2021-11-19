@@ -1,3 +1,5 @@
+--------------------------------------------------
+
 CREATE DATABASE LibraryDatabase;
 
 USE LibraryDatabase;
@@ -192,3 +194,200 @@ on delete no action
 ALTER TABLE person.loan add constraint fk_book foreign key (book_id) references book.book (book_id)
 on update no action 
 on delete cascade
+
+
+--=========================================================
+--==========================================================
+---------- DATA DEFINITION LANGUAGE (DDL) ------------
+-- To Create a Table:
+
+USE SW;
+CREATE TABLE EMPLOYEES
+(EmployeeNo CHAR(10) NOT NULL UNIQUE,
+DepartmentName CHAR(30) NOT NULL DEFAULT “Human Resources”,
+FirstName CHAR(25) NOT NULL,
+LastName CHAR(25) NOT NULL,
+Category CHAR(20) NOT NULL,
+HourlyRate CURRENCY NOT NULL,
+TimeCard LOGICAL NOT NULL,
+HourlySalaried CHAR(1)NOT NULL,
+EmpType CHAR(1) NOT NULL,
+Terminated LOGICAL NOT NULL,
+ExemptCode CHAR(2) NOT NULL,
+Supervisor LOGICAL NOT NULL,
+SupervisorName CHAR(50) NOT NULL,
+BirthDate DATE NOT NULL,
+CollegeDegree CHAR(5) NOT NULL,
+CONSTRAINT Employee_PK PRIMARY KEY(EmployeeNo)
+);
+
+---------------------
+-- To Use IDENTITY Constraint:
+
+CREATE TABLE tblHotel
+(
+HotelNo Int IDENTITY (1,1),
+Name Char(50) NOT NULL,
+Address Char(50) NULL,
+City Char(25) NULL
+);
+
+-- UNIQUE Constraint:
+
+CREATE TABLE EMPLOYEES
+(
+EmployeeNo CHAR(10) NOT NULL UNIQUE
+);
+
+-- FOREIGN KEY 
+
+USE HOTEL;
+GO
+CREATE TABLE tblRoom
+(
+HotelNo Int NOT NULL,
+RoomNo Int NOT NULL,
+Type Char(50) NULL,
+Price Money NULL,
+PRIMARY KEY (HotelNo, RoomNo),
+FOREIGN KEY (HotelNo) REFERENCES tblHotel
+);
+
+-- CHECK Constraint:
+
+USE HOTEL;
+GO
+CREATE TABLE tblRoom
+(
+HotelNo Int NOT NULL,
+RoomNo Int NOT NULL,
+Type Char(50) NULL,
+Price Money NULL,
+PRIMARY KEY (HotelNo, RoomNo),
+FOREIGN KEY (HotelNo) REFERENCES tblHotel,
+CONSTRAINT Valid_Type
+CHECK (Type IN (‘Single’, ‘Double’, ‘Suite’, ‘Executive’))
+);
+
+--
+
+GO
+CREATE TABLE SALESREPS
+(
+Empl_num Int Not Null,
+CHECK (Empl_num BETWEEN 101 and 199),
+Name Char (15),
+Age Int CHECK (Age >= 21),
+Quota Money CHECK (Quota >= 0.0),
+HireDate DateTime,
+CONSTRAINT QuotaCap CHECK ((HireDate < “01-01-2004”) OR (Quota <=300000))
+);
+
+-- DEFAULT Constraint:
+
+USE HOTEL;
+ALTER TABLE tblHotel
+Add CONSTRAINT df_city DEFAULT ‘Vancouver’ FOR City;
+
+-- User-Defined Types:
+
+CREATE TABLE SINTable
+(
+EmployeeID INT Primary Key,
+EmployeeSIN SIN,
+CONSTRAINT CheckSIN
+CHECK (EmployeeSIN LIKE
+‘[0-9][0-9][0-9] – [0-9][0-9] [0-9] – [0-9][0-9][0-9]‘)
+);
+
+-- ALTER TABLE:
+
+USE HOTEL;
+GO
+ALTER TABLE tblHotel
+ADD CONSTRAINT unqName UNIQUE (Name);
+
+--
+
+ALTER TABLE TableName
+ADD ColumnName int IDENTITY(seed, increment);
+
+-- DROP TABLE:
+
+DROP TABLE tblHotel;
+
+---------------- DATA MANIPULATION LANGUAGE (DML) -----------------
+
+-- SELECT: 
+
+-- INSERT:
+
+INSERT INTO Authors
+VALUES('555-93-4670', 'Martin', 'April', '281 555-5673', '816 Market St.,' , 'Vancouver', 'BC', '73405', 0);
+
+--
+
+INSERT INTO Publishers (PubID, PubName, city, province)
+VALUES ('9900', 'Acme Publishing', 'Vancouver', 'BC');
+
+--
+
+INSERT INTO jobs
+VALUES ('DBA', 100, 175);
+
+-- INSERT Into an IDENTITY Column:
+
+SET IDENTITY_INSERT jobs ON
+INSERT INTO jobs (job_id, job_desc, min_lvl, max_lvl)
+VALUES (19, 'DBA2', 100, 175)
+SET IDENTITY_INSERT jobs OFF;
+
+-- INSERT with SELECT:
+
+CREATE TABLE dbo.tmpPublishers (
+PubID char (4) NOT NULL,
+PubName varchar (40) NULL,
+city varchar (20) NULL,
+province char (2) NULL,
+country varchar (30) NULL DEFAULT ('Canada')
+);
+
+INSERT tmpPublishers
+SELECT * FROM Publishers;
+
+-- In this example, we’re copying a subset of data.
+
+INSERT tmpPublishers (PubID, PubName)
+SELECT PubID, PubName
+FROM Publishers;
+
+-- In this example, the publishers’ data are copied to the tmpPublishers table and the country column is set to Canada.
+
+INSERT tmpPublishers (PubID, PubName, city, province, country)
+SELECT PubID, PubName, city, province, 'Canada'
+FROM Publishers;
+
+-- UPDATE:
+
+UPDATE Publishers
+SET country = 'Canada';
+
+--
+
+UPDATE roysched
+SET royalty = royalty + (royalty * .10)
+WHERE royalty BETWEEN 10 and 20;
+
+-- UPDATE Including Subqueries:
+
+UPDATE Employees
+SET job_lvl =
+   (SELECT max_lvl FROM jobs
+    WHERE Employees.job_id = jobs.job_id)
+WHERE DATEPART(year, Employees.HireDate) = 1990;
+
+-- DELETE:
+
+DELETE FROM Sales
+WHERE TitleID IN
+   (SELECT TitleID FROM Books WHERE type = 'mod_cook');
