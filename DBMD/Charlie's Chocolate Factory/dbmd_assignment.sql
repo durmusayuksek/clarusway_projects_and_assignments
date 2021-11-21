@@ -1,3 +1,5 @@
+-------------- DBMD ASSIGNMENT ------------------
+
 CREATE TABLE product (
     product_id INT IDENTITY (1, 1) PRIMARY KEY,
     product_name VARCHAR (225) NOT NULL,
@@ -20,13 +22,13 @@ CREATE TABLE component (
 CREATE TABLE product_stock (
     component_id INT,
     product_id INT,
-    PRIMARY KEY (component_id, product_id),
     FOREIGN KEY (component_id)
     REFERENCES component (component_id)
     ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (product_id)
     REFERENCES product (product_id)
-    ON DELETE CASCADE ON UPDATE CASCADE
+    ON DELETE CASCADE ON UPDATE CASCADE,
+    PRIMARY KEY (component_id, product_id)
 );
 
 CREATE TABLE component_detail (
@@ -34,11 +36,11 @@ CREATE TABLE component_detail (
     supplier_id INT, 
     when_supplied DATE NOT NULL,
     how_much_supplied INT,
-    PRIMARY KEY (component_id, supplier_id),
     FOREIGN KEY (component_id)
     REFERENCES component (component_id)
     ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (supplier_id)
     REFERENCES supplier (supplier_id)
-    ON DELETE CASCADE ON UPDATE CASCADE
+    ON DELETE CASCADE ON UPDATE CASCADE,
+    PRIMARY KEY (component_id, supplier_id)
 );
